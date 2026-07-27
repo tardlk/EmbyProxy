@@ -1,0 +1,30 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+      - name: Build
+        run: dotnet build -c Release
+      - name: Move latest tag
+        run: |
+          git tag -f latest
+          git push --force origin latest
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bin/Release/net6.0/EmbyProxy.dll
+          tag_name: latest
+          name: EmbyProxy
+          make_latest: true
